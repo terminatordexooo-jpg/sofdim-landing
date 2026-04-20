@@ -158,8 +158,24 @@ const TELEGRAM_CONFIG = {
   CHAT_ID: '7042878265',
 };
 
+const RATE_LIMIT_MS = 5 * 60 * 1000;
+const RATE_KEY = 'sofdim_last_submit';
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  const last = parseInt(localStorage.getItem(RATE_KEY) || '0', 10);
+  const elapsed = Date.now() - last;
+  if (last && elapsed < RATE_LIMIT_MS) {
+    const left = Math.ceil((RATE_LIMIT_MS - elapsed) / 1000);
+    const m = Math.floor(left / 60);
+    const s = left % 60;
+    status.hidden = false;
+    status.classList.add('error');
+    status.textContent = `Вы уже отправили заявку. Попробуйте через ${m}:${s.toString().padStart(2, '0')}.`;
+    return;
+  }
+
   const data = Object.fromEntries(new FormData(form).entries());
 
   const text =
@@ -192,11 +208,12 @@ form.addEventListener('submit', async (e) => {
       if (!res.ok) throw new Error('tg');
       status.textContent = '✓ Заявка отправлена. Перезвоним в течение часа.';
       form.reset();
+      localStorage.setItem(RATE_KEY, Date.now().toString());
     } else {
-      // fallback: лог в консоль, чтобы проверить до интеграции
       console.log('LEAD:', data);
       console.log(text);
       status.textContent = '✓ Форма готова. Подключи Telegram-бот в script.js → TELEGRAM_CONFIG.';
+      localStorage.setItem(RATE_KEY, Date.now().toString());
     }
   } catch (err) {
     status.classList.add('error');
