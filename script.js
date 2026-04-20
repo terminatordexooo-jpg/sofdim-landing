@@ -154,10 +154,8 @@ const status = document.getElementById('formStatus');
 
 /* === CONFIG: подставь свой токен и chat_id === */
 const TELEGRAM_CONFIG = {
-  // 1) Создай бота у @BotFather, получи TOKEN
-  // 2) Свой chat_id: напиши боту /start и открой https://api.telegram.org/bot<TOKEN>/getUpdates
-  BOT_TOKEN: '', // <-- сюда токен, например '123456:ABC...'
-  CHAT_ID: '',   // <-- сюда твой chat_id, например '7042878265'
+  BOT_TOKEN: '8672726415:AAHH5K7SohIcP4_wT4rEKS4A1zPyNox0yBo',
+  CHAT_ID: '7042878265',
 };
 
 form.addEventListener('submit', async (e) => {
