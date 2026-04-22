@@ -42,111 +42,104 @@ const io = new IntersectionObserver(
 document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 
 /* --------- Diameter picker --------- */
-const DIA_DATA = {
-  100: {
-    title: 'Ø100 мм — компактные котлы',
-    desc: 'Для газовых настенных котлов малой мощности и небольших каминных топок до 10 кВт.',
-    use: 'Газовые котлы 6–12 кВт',
-    outer: 'Ø150 мм (изоляция 25 мм)',
-    steel: 'AISI 304',
-  },
-  115: {
-    title: 'Ø115 мм — газовые настенники',
-    desc: 'Европейский стандарт для немецких и итальянских газовых котлов до 24 кВт.',
-    use: 'Bosch, Vaillant, Ariston до 24 кВт',
-    outer: 'Ø165 мм (изоляция 25 мм)',
-    steel: 'AISI 304',
-  },
-  120: {
-    title: 'Ø120 мм — средние котлы',
-    desc: 'Ходовой диаметр для газовых и электрических систем средней мощности.',
-    use: 'Котлы 18–28 кВт',
-    outer: 'Ø170 мм (изоляция 25 мм)',
-    steel: 'AISI 304',
-  },
-  130: {
-    title: 'Ø130 мм — универсал',
-    desc: 'Подходит для большинства бытовых котлов и мини-каминов.',
-    use: 'Настенные котлы и малые камины',
-    outer: 'Ø180 мм (изоляция 25 мм)',
-    steel: 'AISI 304 / 321',
-  },
-  140: {
-    title: 'Ø140 мм — твёрдое топливо',
-    desc: 'Малые твердотопливные котлы, печи-буржуйки, уличные казаны.',
-    use: 'ТТ-котлы до 18 кВт, печи',
-    outer: 'Ø240 мм (изоляция 50 мм)',
-    steel: 'AISI 321',
-  },
-  150: {
-    title: 'Ø150 мм — самый популярный',
-    desc: 'Классика для ТТ-котлов среднего частного дома и большинства банных печей.',
-    use: 'ТТ-котлы 20–30 кВт, бани',
-    outer: 'Ø250 мм (изоляция 50 мм)',
-    steel: 'AISI 321',
-  },
-  160: {
-    title: 'Ø160 мм — средне-большие ТТ',
-    desc: 'Для котлов верхнего горения и каминных вкладышей.',
-    use: 'ТТ-котлы 25–35 кВт, камины',
-    outer: 'Ø260 мм (изоляция 50 мм)',
-    steel: 'AISI 321',
-  },
-  180: {
-    title: 'Ø180 мм — мощные ТТ-котлы',
-    desc: 'Для больших домов и пеллетных котлов с длительным горением.',
-    use: 'ТТ-котлы 30–45 кВт',
-    outer: 'Ø280 мм (изоляция 50 мм)',
-    steel: 'AISI 321',
-  },
-  200: {
-    title: 'Ø200 мм — коттеджи',
-    desc: 'Большие твердотопливные котлы, каминные залы, производственные печи.',
-    use: 'ТТ-котлы 40–60 кВт',
-    outer: 'Ø300 мм (изоляция 50 мм)',
-    steel: 'AISI 321',
-  },
-  220: {
-    title: 'Ø220 мм — промышленный',
-    desc: 'Котельные малого бизнеса, теплицы, цеха.',
-    use: 'Промышленные котлы 50–80 кВт',
-    outer: 'Ø320 мм (изоляция 50 мм)',
-    steel: 'AISI 321',
-  },
-  230: {
-    title: 'Ø230 мм — максимум',
-    desc: 'Максимальный стандартный диаметр. Промышленные задачи и большие общественные здания.',
-    use: 'Котельные 60–100 кВт',
-    outer: 'Ø330 мм (изоляция 50 мм)',
-    steel: 'AISI 321',
-  },
-};
+const SINGLE_DIAMETERS = [100, 110, 120, 130, 140, 150, 160, 180, 200, 220, 230, 250, 300, 350, 400];
+const INSULATED_DIAMETERS = [
+  { inner: 100, outer: 160 },
+  { inner: 110, outer: 180 },
+  { inner: 120, outer: 180 },
+  { inner: 130, outer: 200 },
+  { inner: 140, outer: 200 },
+  { inner: 150, outer: 220 },
+  { inner: 160, outer: 220 },
+  { inner: 180, outer: 250 },
+  { inner: 200, outer: 260 },
+  { inner: 220, outer: 280 },
+  { inner: 230, outer: 300 },
+  { inner: 250, outer: 320 },
+  { inner: 300, outer: 360 },
+  { inner: 350, outer: 420 },
+  { inner: 400, outer: 460 },
+];
 
-const diaButtons = document.querySelectorAll('.dia-btn');
+const diaList = document.getElementById('diaList');
+const diaRing = document.getElementById('diaRing');
 const diaValue = document.getElementById('diaValue');
 const diaTitle = document.getElementById('diaTitle');
-const diaDesc = document.getElementById('diaDesc');
-const diaUse = document.getElementById('diaUse');
-const diaOuter = document.getElementById('diaOuter');
-const diaSteel = document.getElementById('diaSteel');
+const diaInner = document.getElementById('diaInner');
+const diaThickness = document.getElementById('diaThickness');
+const diaPriceOld = document.getElementById('diaPriceOld');
+const diaPriceNew = document.getElementById('diaPriceNew');
 const diaCta = document.getElementById('diaCta');
+const typeButtons = document.querySelectorAll('.type-btn');
 
-diaButtons.forEach((btn) => {
+const DIA_MIN = 100;
+const DIA_MAX = 400;
+const SCALE_MIN = 0.65;
+const SCALE_MAX = 1.1;
+
+function scaleFor(diameter) {
+  const clamped = Math.max(DIA_MIN, Math.min(DIA_MAX, diameter));
+  const t = (clamped - DIA_MIN) / (DIA_MAX - DIA_MIN);
+  return SCALE_MIN + t * (SCALE_MAX - SCALE_MIN);
+}
+
+let currentType = 'single';
+let currentIndex = 0;
+
+function renderDiaButtons() {
+  diaList.innerHTML = '';
+  const items = currentType === 'single' ? SINGLE_DIAMETERS : INSULATED_DIAMETERS;
+  items.forEach((item, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'dia-btn' + (i === currentIndex ? ' active' : '');
+    btn.dataset.i = i;
+    btn.textContent = currentType === 'single' ? `Ø${item}` : `${item.inner}/${item.outer}`;
+    btn.addEventListener('click', () => {
+      currentIndex = i;
+      document.querySelectorAll('.dia-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      updatePanel();
+    });
+    diaList.appendChild(btn);
+  });
+}
+
+function updatePanel() {
+  const items = currentType === 'single' ? SINGLE_DIAMETERS : INSULATED_DIAMETERS;
+  const item = items[currentIndex];
+  let inner;
+  if (currentType === 'single') {
+    inner = item;
+    diaValue.textContent = item;
+    diaTitle.textContent = `Ø${item} мм — одностенная`;
+    diaInner.textContent = `Ø${item} мм`;
+    diaCta.textContent = item;
+  } else {
+    inner = item.inner;
+    diaValue.textContent = item.inner;
+    diaTitle.textContent = `Ø${item.inner}/${item.outer} мм — утеплённая`;
+    diaInner.textContent = `Ø${item.inner} / ${item.outer} мм`;
+    diaCta.textContent = `${item.inner}/${item.outer}`;
+  }
+  diaRing.style.setProperty('--dia-scale', scaleFor(inner).toFixed(3));
+  diaThickness.textContent = '0,6 / 0,8 / 1 мм';
+  diaPriceOld.textContent = '';
+  diaPriceNew.textContent = 'Уточните цену';
+}
+
+typeButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
-    diaButtons.forEach((b) => b.classList.remove('active'));
+    typeButtons.forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
-    const d = btn.dataset.d;
-    const info = DIA_DATA[d];
-    if (!info) return;
-    diaValue.textContent = d;
-    diaTitle.textContent = info.title;
-    diaDesc.textContent = info.desc;
-    diaUse.textContent = info.use;
-    diaOuter.textContent = info.outer;
-    diaSteel.textContent = info.steel;
-    diaCta.textContent = d;
+    currentType = btn.dataset.type;
+    currentIndex = 0;
+    renderDiaButtons();
+    updatePanel();
   });
 });
+
+renderDiaButtons();
+updatePanel();
 
 /* --------- Lead form --------- */
 const form = document.getElementById('leadForm');
@@ -182,7 +175,7 @@ form.addEventListener('submit', async (e) => {
     '🔥 *Новая заявка SOFDIM*\n\n' +
     `👤 Имя: ${data.name || '—'}\n` +
     `📱 Телефон: ${data.phone || '—'}\n` +
-    `📏 Диаметр: ${data.diameter || 'подберёт инженер'}\n` +
+    `📏 Диаметр: ${data.diameter || 'подберёт специалист'}\n` +
     `🔧 Источник: ${data.source || '—'}\n` +
     `💬 Коммент: ${data.comment || '—'}\n` +
     `\n🕐 ${new Date().toLocaleString('ru-RU')}`;
@@ -206,7 +199,7 @@ form.addEventListener('submit', async (e) => {
         }
       );
       if (!res.ok) throw new Error('tg');
-      status.textContent = '✓ Заявка отправлена. Перезвоним в течение часа.';
+      status.textContent = '✓ Заявка отправлена. Перезвоним в течение 15–20 минут.';
       form.reset();
       localStorage.setItem(RATE_KEY, Date.now().toString());
     } else {
@@ -248,23 +241,23 @@ form.addEventListener('submit', async (e) => {
   const group = new THREE.Group();
   scene.add(group);
 
-  // Outer pipe
+  // Outer pipe — mirror polished stainless
   const outerGeom = new THREE.CylinderGeometry(1.2, 1.2, 4, 64, 1, true);
   const outerMat = new THREE.MeshStandardMaterial({
-    color: 0xd4d4d8,
-    metalness: 0.95,
-    roughness: 0.25,
+    color: 0xf0f0f4,
+    metalness: 1.0,
+    roughness: 0.12,
     side: THREE.DoubleSide,
   });
   const outer = new THREE.Mesh(outerGeom, outerMat);
   group.add(outer);
 
-  // Inner pipe
+  // Inner pipe — polished mirror-finish stainless steel
   const innerGeom = new THREE.CylinderGeometry(0.85, 0.85, 4.2, 64, 1, true);
   const innerMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a1a,
-    metalness: 0.8,
-    roughness: 0.4,
+    color: 0xe8e8ec,
+    metalness: 1.0,
+    roughness: 0.08,
     side: THREE.DoubleSide,
   });
   const inner = new THREE.Mesh(innerGeom, innerMat);
@@ -299,6 +292,62 @@ form.addEventListener('submit', async (e) => {
     line.rotation.x = Math.PI / 2;
     group.add(line);
   }
+
+  // Product logo label wrapped around the pipe
+  const logoCanvas = document.createElement('canvas');
+  logoCanvas.width = 2048;
+  logoCanvas.height = 256;
+  const lctx = logoCanvas.getContext('2d');
+  lctx.clearRect(0, 0, logoCanvas.width, logoCanvas.height);
+
+  // Draw logo 2 times around so it's visible from both sides
+  const drawLogo = (cx) => {
+    // orange mark circle
+    const markSize = 56;
+    lctx.save();
+    lctx.translate(cx - 220, 128);
+    const grad = lctx.createLinearGradient(-markSize, -markSize, markSize, markSize);
+    grad.addColorStop(0, '#ff8a4c');
+    grad.addColorStop(1, '#e04f1c');
+    lctx.fillStyle = grad;
+    lctx.beginPath();
+    lctx.roundRect(-markSize / 2, -markSize / 2, markSize, markSize, 14);
+    lctx.fill();
+    // inner ring
+    lctx.strokeStyle = 'rgba(255,255,255,0.95)';
+    lctx.lineWidth = 5;
+    lctx.beginPath();
+    lctx.arc(0, 0, markSize / 3.5, 0, Math.PI * 2);
+    lctx.stroke();
+    lctx.restore();
+
+    // SOFDIM text
+    lctx.fillStyle = '#ffffff';
+    lctx.font = '900 108px Unbounded, Inter, sans-serif';
+    lctx.textAlign = 'left';
+    lctx.textBaseline = 'middle';
+    lctx.fillText('SOFDIM', cx - 170, 128);
+  };
+  drawLogo(logoCanvas.width * 0.25);
+  drawLogo(logoCanvas.width * 0.75);
+
+  const logoTex = new THREE.CanvasTexture(logoCanvas);
+  logoTex.anisotropy = 8;
+
+  const labelGeom = new THREE.CylinderGeometry(1.215, 1.215, 0.5, 128, 1, true);
+  const labelMat = new THREE.MeshStandardMaterial({
+    map: logoTex,
+    transparent: true,
+    side: THREE.DoubleSide,
+    metalness: 0.3,
+    roughness: 0.5,
+    emissive: 0xffffff,
+    emissiveMap: logoTex,
+    emissiveIntensity: 0.25,
+  });
+  const label = new THREE.Mesh(labelGeom, labelMat);
+  label.position.y = 0.2;
+  group.add(label);
 
   // Lighting
   const ambient = new THREE.AmbientLight(0x404040, 2);
