@@ -2,6 +2,55 @@
    SOFDIM — Landing JS
    ============================================ */
 
+/* --------- i18n (UK default / RU) --------- */
+const LANG_KEY = 'sofdim_lang';
+let currentLang = localStorage.getItem(LANG_KEY) || 'uk';
+
+const PICKER_I18N = {
+  uk: { single: 'одностінна', insulated: 'утеплена', ask: 'Уточнити ціну', from: 'від' },
+  ru: { single: 'одностенная', insulated: 'утеплённая', ask: 'Уточнить цену', from: 'от' },
+};
+
+function setLang(lang) {
+  currentLang = lang === 'ru' ? 'ru' : 'uk';
+  document.documentElement.lang = currentLang;
+
+  document.querySelectorAll('[data-ru]').forEach((el) => {
+    if (!el.dataset.ukOriginal) el.dataset.ukOriginal = el.innerHTML;
+    el.innerHTML = currentLang === 'ru' ? el.dataset.ru : el.dataset.ukOriginal;
+  });
+
+  document.querySelectorAll('[data-ru-ph]').forEach((el) => {
+    if (!el.dataset.ukOriginalPh) el.dataset.ukOriginalPh = el.placeholder;
+    el.placeholder = currentLang === 'ru' ? el.dataset.ruPh : el.dataset.ukOriginalPh;
+  });
+
+  document.querySelectorAll('meta[name="description"][data-ru]').forEach((el) => {
+    if (!el.dataset.ukOriginal) el.dataset.ukOriginal = el.content;
+    el.content = currentLang === 'ru' ? el.dataset.ru : el.dataset.ukOriginal;
+  });
+
+  const titleEl = document.querySelector('title[data-ru]');
+  if (titleEl) {
+    if (!titleEl.dataset.ukOriginal) titleEl.dataset.ukOriginal = titleEl.textContent;
+    titleEl.textContent = currentLang === 'ru' ? titleEl.dataset.ru : titleEl.dataset.ukOriginal;
+  }
+
+  document.querySelectorAll('.lang-btn').forEach((btn) => {
+    const on = btn.dataset.lang === currentLang;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+
+  localStorage.setItem(LANG_KEY, currentLang);
+
+  if (typeof updatePanel === 'function') updatePanel();
+}
+
+document.querySelectorAll('.lang-btn').forEach((btn) => {
+  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+
 /* --------- Nav scroll state --------- */
 const nav = document.querySelector('.nav');
 const onScroll = () => {
@@ -124,17 +173,18 @@ function renderDiaButtons() {
 }
 
 function updatePanel() {
+  const t = PICKER_I18N[currentLang];
   const items = currentType === 'single' ? SINGLE_DIAMETERS : INSULATED_DIAMETERS;
   const item = items[currentIndex];
   const inner = item.inner;
   if (currentType === 'single') {
     diaValue.textContent = inner;
-    diaTitle.textContent = `Ø${inner} мм — одностінна`;
+    diaTitle.textContent = `Ø${inner} мм — ${t.single}`;
     diaInner.textContent = `Ø${inner} мм`;
     diaCta.textContent = inner;
   } else {
     diaValue.textContent = inner;
-    diaTitle.textContent = `Ø${inner}/${item.outer} мм — утеплена`;
+    diaTitle.textContent = `Ø${inner}/${item.outer} мм — ${t.insulated}`;
     diaInner.textContent = `Ø${inner} / ${item.outer} мм`;
     diaCta.textContent = `${inner}/${item.outer}`;
   }
@@ -142,10 +192,10 @@ function updatePanel() {
   diaThickness.textContent = '0,6 / 0,8 / 1 мм';
   if (item.price) {
     diaPriceOld.textContent = item.old ? `${UAH(item.old)} ₴` : '';
-    diaPriceNew.textContent = `від ${UAH(item.price)} ₴`;
+    diaPriceNew.textContent = `${t.from} ${UAH(item.price)} ₴`;
   } else {
     diaPriceOld.textContent = '';
-    diaPriceNew.textContent = 'Уточнити ціну';
+    diaPriceNew.textContent = t.ask;
   }
 }
 
@@ -162,6 +212,7 @@ typeButtons.forEach((btn) => {
 
 renderDiaButtons();
 updatePanel();
+setLang(currentLang);
 
 /* --------- Lead form --------- */
 const form = document.getElementById('leadForm');
@@ -176,35 +227,67 @@ const TELEGRAM_CONFIG = {
 const RATE_LIMIT_MS = 5 * 60 * 1000;
 const RATE_KEY = 'sofdim_last_submit';
 
+const FORM_I18N = {
+  uk: {
+    rateLimit: (m, s) => `Ви вже надіслали заявку. Спробуйте через ${m}:${s}.`,
+    sending: 'Надсилаємо…',
+    ok: '✓ Заявка надіслана. Передзвонимо протягом 15–20 хвилин.',
+    err: 'Помилка надсилання. Напишіть у Telegram напряму.',
+    tgTitle: '🔥 *Нова заявка SOFDIM*',
+    tgName: '👤 Ім\'я',
+    tgPhone: '📱 Телефон',
+    tgDia: '📏 Діаметр',
+    tgDiaDef: 'підбере фахівець',
+    tgSrc: '🔧 Джерело',
+    tgComm: '💬 Коментар',
+    locale: 'uk-UA',
+  },
+  ru: {
+    rateLimit: (m, s) => `Вы уже отправили заявку. Попробуйте через ${m}:${s}.`,
+    sending: 'Отправляем…',
+    ok: '✓ Заявка отправлена. Перезвоним в течение 15–20 минут.',
+    err: 'Ошибка отправки. Напишите в Telegram напрямую.',
+    tgTitle: '🔥 *Новая заявка SOFDIM*',
+    tgName: '👤 Имя',
+    tgPhone: '📱 Телефон',
+    tgDia: '📏 Диаметр',
+    tgDiaDef: 'подберёт специалист',
+    tgSrc: '🔧 Источник',
+    tgComm: '💬 Коммент',
+    locale: 'ru-RU',
+  },
+};
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  const L = FORM_I18N[currentLang];
 
   const last = parseInt(localStorage.getItem(RATE_KEY) || '0', 10);
   const elapsed = Date.now() - last;
   if (last && elapsed < RATE_LIMIT_MS) {
     const left = Math.ceil((RATE_LIMIT_MS - elapsed) / 1000);
     const m = Math.floor(left / 60);
-    const s = left % 60;
+    const s = (left % 60).toString().padStart(2, '0');
     status.hidden = false;
     status.classList.add('error');
-    status.textContent = `Ви вже надіслали заявку. Спробуйте через ${m}:${s.toString().padStart(2, '0')}.`;
+    status.textContent = L.rateLimit(m, s);
     return;
   }
 
   const data = Object.fromEntries(new FormData(form).entries());
 
   const text =
-    '🔥 *Нова заявка SOFDIM*\n\n' +
-    `👤 Ім'я: ${data.name || '—'}\n` +
-    `📱 Телефон: ${data.phone || '—'}\n` +
-    `📏 Діаметр: ${data.diameter || 'підбере фахівець'}\n` +
-    `🔧 Джерело: ${data.source || '—'}\n` +
-    `💬 Коментар: ${data.comment || '—'}\n` +
-    `\n🕐 ${new Date().toLocaleString('uk-UA')}`;
+    `${L.tgTitle}\n\n` +
+    `${L.tgName}: ${data.name || '—'}\n` +
+    `${L.tgPhone}: ${data.phone || '—'}\n` +
+    `${L.tgDia}: ${data.diameter || L.tgDiaDef}\n` +
+    `${L.tgSrc}: ${data.source || '—'}\n` +
+    `${L.tgComm}: ${data.comment || '—'}\n` +
+    `\n🕐 ${new Date().toLocaleString(L.locale)}`;
 
   status.hidden = false;
   status.classList.remove('error');
-  status.textContent = 'Надсилаємо…';
+  status.textContent = L.sending;
 
   try {
     if (TELEGRAM_CONFIG.BOT_TOKEN && TELEGRAM_CONFIG.CHAT_ID) {
@@ -221,18 +304,18 @@ form.addEventListener('submit', async (e) => {
         }
       );
       if (!res.ok) throw new Error('tg');
-      status.textContent = '✓ Заявка надіслана. Передзвонимо протягом 15–20 хвилин.';
+      status.textContent = L.ok;
       form.reset();
       localStorage.setItem(RATE_KEY, Date.now().toString());
     } else {
       console.log('LEAD:', data);
       console.log(text);
-      status.textContent = '✓ Форма готова. Підключи Telegram-бот у script.js → TELEGRAM_CONFIG.';
+      status.textContent = L.ok;
       localStorage.setItem(RATE_KEY, Date.now().toString());
     }
   } catch (err) {
     status.classList.add('error');
-    status.textContent = 'Помилка надсилання. Напишіть у Telegram напряму.';
+    status.textContent = L.err;
   }
 });
 

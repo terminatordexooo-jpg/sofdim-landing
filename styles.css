@@ -131,6 +131,38 @@ a { color: inherit; text-decoration: none; transition: color .2s; }
 .nav-contact {
   display: flex; align-items: center; gap: 10px;
 }
+.lang-switch {
+  display: inline-flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-strong);
+  border-radius: 100px;
+  padding: 3px;
+  gap: 2px;
+}
+.lang-btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all .15s ease;
+  line-height: 1;
+}
+.lang-btn:hover { color: #fff; }
+.lang-btn.active {
+  background: linear-gradient(135deg, #ff8a4c, #e04f1c);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(224,79,28,0.35);
+}
+@media (max-width: 720px) {
+  .lang-switch { padding: 2px; }
+  .lang-btn { font-size: 0.68rem; padding: 4px 8px; }
+}
 .contact-icon {
   display: inline-flex;
   align-items: center;
