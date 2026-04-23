@@ -42,24 +42,43 @@ const io = new IntersectionObserver(
 document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 
 /* --------- Diameter picker --------- */
-const SINGLE_DIAMETERS = [100, 110, 120, 130, 140, 150, 160, 180, 200, 220, 230, 250, 300, 350, 400];
-const INSULATED_DIAMETERS = [
-  { inner: 100, outer: 160 },
-  { inner: 110, outer: 180 },
-  { inner: 120, outer: 180 },
-  { inner: 130, outer: 200 },
-  { inner: 140, outer: 200 },
-  { inner: 150, outer: 220 },
-  { inner: 160, outer: 220 },
-  { inner: 180, outer: 250 },
-  { inner: 200, outer: 260 },
-  { inner: 220, outer: 280 },
-  { inner: 230, outer: 300 },
-  { inner: 250, outer: 320 },
-  { inner: 300, outer: 360 },
-  { inner: 350, outer: 420 },
-  { inner: 400, outer: 460 },
+/* Цены — стенка 0.6 мм (акционные, с sofdim.com). old = зачёркнутая, new = со скидкой. */
+const SINGLE_DIAMETERS = [
+  { inner: 100, old: 2738,  price: 2464 },
+  { inner: 110, old: 3010,  price: 2709 },
+  { inner: 120, old: 3289,  price: 2960 },
+  { inner: 130, old: 3563,  price: 3207 },
+  { inner: 140, old: 3835,  price: 3452 },
+  { inner: 150, old: 4116,  price: 3704 },
+  { inner: 160, old: 4382,  price: 3944 },
+  { inner: 180, old: 4928,  price: 4435 },
+  { inner: 200, old: 5480,  price: 4932 },
+  { inner: 220, old: 6059,  price: 5453 },
+  { inner: 230, old: 6299,  price: 5669 },
+  { inner: 250, old: 8112,  price: 7301 },
+  { inner: 300, old: 10895, price: 9806 },
+  { inner: 350, old: 12848, price: 11563 },
+  { inner: 400, old: 14471, price: 13024 },
 ];
+const INSULATED_DIAMETERS = [
+  { inner: 100, outer: 160, old: 6124,  price: 5512 },
+  { inner: 110, outer: 180, old: 6896,  price: 6206 },
+  { inner: 120, outer: 180, old: 7053,  price: 6348 },
+  { inner: 130, outer: 200, old: 7861,  price: 7075 },
+  { inner: 140, outer: 200, old: 8029,  price: 7226 },
+  { inner: 150, outer: 220, old: 8833,  price: 7950 },
+  { inner: 160, outer: 220, old: 9614,  price: 8653 },
+  { inner: 180, outer: 250, old: 10392, price: 9353 },
+  { inner: 200, outer: 260, old: 11062, price: 9956 },
+  { inner: 220, outer: 280, old: 13692, price: 12323 },
+  { inner: 230, outer: 300, old: 14886, price: 13397 },
+  { inner: 250, outer: 320, old: 17510, price: 15759 },
+  { inner: 300, outer: 360, old: 20385, price: 18347 },
+  { inner: 350, outer: 420, old: 23683, price: 21315 },
+  { inner: 400, outer: 460, old: 26114, price: 23503 },
+];
+
+const UAH = new Intl.NumberFormat('uk-UA').format;
 
 const diaList = document.getElementById('diaList');
 const diaRing = document.getElementById('diaRing');
@@ -93,7 +112,7 @@ function renderDiaButtons() {
     const btn = document.createElement('button');
     btn.className = 'dia-btn' + (i === currentIndex ? ' active' : '');
     btn.dataset.i = i;
-    btn.textContent = currentType === 'single' ? `Ø${item}` : `${item.inner}/${item.outer}`;
+    btn.textContent = currentType === 'single' ? `Ø${item.inner}` : `${item.inner}/${item.outer}`;
     btn.addEventListener('click', () => {
       currentIndex = i;
       document.querySelectorAll('.dia-btn').forEach((b) => b.classList.remove('active'));
@@ -107,24 +126,27 @@ function renderDiaButtons() {
 function updatePanel() {
   const items = currentType === 'single' ? SINGLE_DIAMETERS : INSULATED_DIAMETERS;
   const item = items[currentIndex];
-  let inner;
+  const inner = item.inner;
   if (currentType === 'single') {
-    inner = item;
-    diaValue.textContent = item;
-    diaTitle.textContent = `Ø${item} мм — одностенная`;
-    diaInner.textContent = `Ø${item} мм`;
-    diaCta.textContent = item;
+    diaValue.textContent = inner;
+    diaTitle.textContent = `Ø${inner} мм — одностінна`;
+    diaInner.textContent = `Ø${inner} мм`;
+    diaCta.textContent = inner;
   } else {
-    inner = item.inner;
-    diaValue.textContent = item.inner;
-    diaTitle.textContent = `Ø${item.inner}/${item.outer} мм — утеплённая`;
-    diaInner.textContent = `Ø${item.inner} / ${item.outer} мм`;
-    diaCta.textContent = `${item.inner}/${item.outer}`;
+    diaValue.textContent = inner;
+    diaTitle.textContent = `Ø${inner}/${item.outer} мм — утеплена`;
+    diaInner.textContent = `Ø${inner} / ${item.outer} мм`;
+    diaCta.textContent = `${inner}/${item.outer}`;
   }
   diaRing.style.setProperty('--dia-scale', scaleFor(inner).toFixed(3));
   diaThickness.textContent = '0,6 / 0,8 / 1 мм';
-  diaPriceOld.textContent = '';
-  diaPriceNew.textContent = 'Уточните цену';
+  if (item.price) {
+    diaPriceOld.textContent = item.old ? `${UAH(item.old)} ₴` : '';
+    diaPriceNew.textContent = `від ${UAH(item.price)} ₴`;
+  } else {
+    diaPriceOld.textContent = '';
+    diaPriceNew.textContent = 'Уточнити ціну';
+  }
 }
 
 typeButtons.forEach((btn) => {
@@ -165,24 +187,24 @@ form.addEventListener('submit', async (e) => {
     const s = left % 60;
     status.hidden = false;
     status.classList.add('error');
-    status.textContent = `Вы уже отправили заявку. Попробуйте через ${m}:${s.toString().padStart(2, '0')}.`;
+    status.textContent = `Ви вже надіслали заявку. Спробуйте через ${m}:${s.toString().padStart(2, '0')}.`;
     return;
   }
 
   const data = Object.fromEntries(new FormData(form).entries());
 
   const text =
-    '🔥 *Новая заявка SOFDIM*\n\n' +
-    `👤 Имя: ${data.name || '—'}\n` +
+    '🔥 *Нова заявка SOFDIM*\n\n' +
+    `👤 Ім'я: ${data.name || '—'}\n` +
     `📱 Телефон: ${data.phone || '—'}\n` +
-    `📏 Диаметр: ${data.diameter || 'подберёт специалист'}\n` +
-    `🔧 Источник: ${data.source || '—'}\n` +
-    `💬 Коммент: ${data.comment || '—'}\n` +
-    `\n🕐 ${new Date().toLocaleString('ru-RU')}`;
+    `📏 Діаметр: ${data.diameter || 'підбере фахівець'}\n` +
+    `🔧 Джерело: ${data.source || '—'}\n` +
+    `💬 Коментар: ${data.comment || '—'}\n` +
+    `\n🕐 ${new Date().toLocaleString('uk-UA')}`;
 
   status.hidden = false;
   status.classList.remove('error');
-  status.textContent = 'Отправляем…';
+  status.textContent = 'Надсилаємо…';
 
   try {
     if (TELEGRAM_CONFIG.BOT_TOKEN && TELEGRAM_CONFIG.CHAT_ID) {
@@ -199,18 +221,18 @@ form.addEventListener('submit', async (e) => {
         }
       );
       if (!res.ok) throw new Error('tg');
-      status.textContent = '✓ Заявка отправлена. Перезвоним в течение 15–20 минут.';
+      status.textContent = '✓ Заявка надіслана. Передзвонимо протягом 15–20 хвилин.';
       form.reset();
       localStorage.setItem(RATE_KEY, Date.now().toString());
     } else {
       console.log('LEAD:', data);
       console.log(text);
-      status.textContent = '✓ Форма готова. Подключи Telegram-бот в script.js → TELEGRAM_CONFIG.';
+      status.textContent = '✓ Форма готова. Підключи Telegram-бот у script.js → TELEGRAM_CONFIG.';
       localStorage.setItem(RATE_KEY, Date.now().toString());
     }
   } catch (err) {
     status.classList.add('error');
-    status.textContent = 'Ошибка отправки. Напишите в Telegram напрямую.';
+    status.textContent = 'Помилка надсилання. Напишіть у Telegram напряму.';
   }
 });
 
