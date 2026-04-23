@@ -1064,4 +1064,125 @@ a { color: inherit; text-decoration: none; transition: color .2s; }
   .section { padding: 72px 0; }
   .lead-form { padding: 24px; grid-template-columns: 1fr; }
   .diameter-picker { padding: 24px; }
+  .hero-title { font-size: clamp(2rem, 9vw, 3.4rem); }
+  .hero-cta .btn { flex: 1 1 auto; }
+  .marquee-track { font-size: 0.9rem; gap: 24px; }
+}
+
+/* === Mobile (≤560px) ================================================= */
+@media (max-width: 560px) {
+  .container { padding: 0 16px; }
+  .section { padding: 56px 0; }
+  .section-head { margin-bottom: 40px; }
+
+  /* Nav */
+  .nav { padding: 12px 0; }
+  .nav-inner { gap: 10px; }
+  .logo { font-size: 0.95rem; gap: 8px; }
+  .logo-mark { width: 26px; height: 26px; }
+  .nav-contact { gap: 6px; }
+  .nav .btn-sm { padding: 8px 14px; font-size: 0.78rem; }
+
+  /* Hero */
+  .hero { padding: 96px 0 48px; }
+  .hero-title { font-size: clamp(1.85rem, 8.5vw, 2.6rem); margin-bottom: 18px; line-height: 1.05; }
+  .hero-badge { font-size: 0.78rem; padding: 6px 12px; margin-bottom: 18px; }
+  .hero-steel-marks { gap: 8px; font-size: 0.68rem; }
+  .hero-steel-marks span { padding-right: 10px; }
+  .hero-sub { font-size: 0.95rem; margin-bottom: 28px; }
+  .hero-cta { margin-bottom: 40px; gap: 10px; }
+  .hero-cta .btn { width: 100%; }
+  .hero-stats { padding-top: 24px; gap: 16px 20px; }
+  .hero-stats > div { flex: 1 1 42%; min-width: 130px; }
+  .hero-stats b { font-size: 1.25rem; }
+  .hero-stats span { font-size: 0.75rem; }
+  .scroll-indicator { display: none; }
+
+  /* Marquee */
+  .marquee { padding: 14px 0; }
+  .marquee-track { font-size: 0.78rem; gap: 18px; letter-spacing: 0.05em; }
+
+  /* Why cards */
+  .cards-compact .card { padding: 22px 20px; }
+  .cards-compact .card h3 { font-size: 1.05rem; }
+
+  /* Diameter picker */
+  .diameter-picker { padding: 20px 14px; }
+  .type-toggle {
+    padding: 4px;
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+  }
+  .type-btn {
+    padding: 9px 12px;
+    font-size: 0.8rem;
+    flex: 1 1 50%;
+    text-align: center;
+  }
+  .diameter-list { gap: 6px; margin-bottom: 28px; }
+  .dia-btn { padding: 8px 12px; font-size: 0.82rem; }
+  .dia-visual { min-height: 240px; }
+  .dia-ring {
+    width: calc(180px * var(--dia-scale));
+    height: calc(180px * var(--dia-scale));
+  }
+  .dia-value { font-size: calc(3.2rem * var(--dia-scale)); }
+  .dia-ring::after { inset: -10px; }
+  .dia-info h3 { font-size: 1.3rem; }
+  .dia-features li { padding: 10px 0; font-size: 0.88rem; gap: 10px; flex-wrap: wrap; }
+  .dia-price { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+  .price-new { font-size: 1.15rem; }
+  .price-old { font-size: 0.88rem; }
+
+  /* Kit compose */
+  .kit-compose { padding: 20px 18px; margin-bottom: 28px; }
+  .kit-compose-title { font-size: 0.85rem; }
+  .kit-compose-list li { font-size: 0.88rem; gap: 10px; }
+
+  /* Catalog */
+  .catalog-cards .cat-card { padding: 18px; }
+  .catalog-cards .cat-card h3 { font-size: 1rem; }
+  .catalog-cards .cat-card p { font-size: 0.83rem; }
+
+  /* Steps */
+  .step { padding: 24px; }
+  .step-num { font-size: 2.4rem; margin-bottom: 10px; }
+
+  /* Lead form */
+  .lead-section { padding: 48px 0; }
+  .lead-form { padding: 20px; gap: 12px; }
+  .lead-copy p { font-size: 0.95rem; }
+
+  /* FAQ */
+  .faq-item { padding: 16px 18px; }
+  .faq-item summary { font-size: 0.94rem; padding-right: 28px; }
+  .faq-item summary::after { font-size: 1.25rem; }
+  .faq-item p { font-size: 0.9rem; }
+
+  /* Footer */
+  .footer { padding: 48px 0 20px; }
+  .footer-inner { gap: 24px; margin-bottom: 32px; }
+  .footer-desc { font-size: 0.85rem; }
+}
+
+/* === Very small (≤420px) ============================================= */
+@media (max-width: 420px) {
+  .nav .btn-sm { display: none; }
+  .nav-contact { gap: 6px; }
+  .contact-icon { width: 32px; height: 32px; }
+
+  .hero-title { font-size: clamp(1.65rem, 8vw, 2.1rem); }
+  .hero-steel-marks { gap: 6px; font-size: 0.62rem; }
+  .hero-badge { font-size: 0.72rem; }
+
+  .dia-ring {
+    width: calc(150px * var(--dia-scale));
+    height: calc(150px * var(--dia-scale));
+  }
+  .dia-value { font-size: calc(2.6rem * var(--dia-scale)); }
+  .dia-visual { min-height: 200px; }
+
+  .footer-inner { grid-template-columns: 1fr; gap: 24px; }
+  .footer-bottom { font-size: 0.75rem; }
 }
