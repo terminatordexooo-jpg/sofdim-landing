@@ -7,8 +7,8 @@ const LANG_KEY = 'sofdim_lang';
 let currentLang = localStorage.getItem(LANG_KEY) || 'uk';
 
 const PICKER_I18N = {
-  uk: { single: 'одностінна', insulated: 'утеплена', ask: 'Уточнити ціну', from: 'від' },
-  ru: { single: 'одностенная', insulated: 'утеплённая', ask: 'Уточнить цену', from: 'от' },
+  uk: { single: 'одностінна', insulated: 'нерж/нерж', insulatedGalv: 'нерж/оц', ask: 'Уточнити ціну', from: 'від' },
+  ru: { single: 'одностенная', insulated: 'нерж/нерж', insulatedGalv: 'нерж/оц', ask: 'Уточнить цену', from: 'от' },
 };
 
 function setLang(lang) {
@@ -91,45 +91,176 @@ const io = new IntersectionObserver(
 document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 
 /* --------- Diameter picker --------- */
-/* Цены — стенка 0.6 мм (акционные, с sofdim.com). old = зачёркнутая, new = со скидкой. */
-const SINGLE_DIAMETERS = [
-  { inner: 100, old: 2738,  price: 2464 },
-  { inner: 110, old: 3010,  price: 2709 },
-  { inner: 120, old: 3289,  price: 2960 },
-  { inner: 130, old: 3563,  price: 3207 },
-  { inner: 140, old: 3835,  price: 3452 },
-  { inner: 150, old: 4116,  price: 3704 },
-  { inner: 160, old: 4382,  price: 3944 },
-  { inner: 180, old: 4928,  price: 4435 },
-  { inner: 200, old: 5480,  price: 4932 },
-  { inner: 220, old: 6059,  price: 5453 },
-  { inner: 230, old: 6299,  price: 5669 },
-  { inner: 250, old: 8112,  price: 7301 },
-  { inner: 300, old: 10895, price: 9806 },
-  { inner: 350, old: 12848, price: 11563 },
-  { inner: 400, old: 14471, price: 13024 },
-];
-const INSULATED_DIAMETERS = [
-  { inner: 100, outer: 160, old: 6124,  price: 5512 },
-  { inner: 110, outer: 180, old: 6896,  price: 6206 },
-  { inner: 120, outer: 180, old: 7053,  price: 6348 },
-  { inner: 130, outer: 200, old: 7861,  price: 7075 },
-  { inner: 140, outer: 200, old: 8029,  price: 7226 },
-  { inner: 150, outer: 220, old: 8833,  price: 7950 },
-  { inner: 160, outer: 220, old: 9614,  price: 8653 },
-  { inner: 180, outer: 250, old: 10392, price: 9353 },
-  { inner: 200, outer: 260, old: 11062, price: 9956 },
-  { inner: 220, outer: 280, old: 13692, price: 12323 },
-  { inner: 230, outer: 300, old: 14886, price: 13397 },
-  { inner: 250, outer: 320, old: 17510, price: 15759 },
-  { inner: 300, outer: 360, old: 20385, price: 18347 },
-  { inner: 350, outer: 420, old: 23683, price: 21315 },
-  { inner: 400, outer: 460, old: 26114, price: 23503 },
-];
+/* Цены с sofdim.com (акционные). old = зачёркнутая, price = со скидкой. */
+const PRICES = {
+  single: {
+    '0.6': [
+      { inner: 100, old: 2738,  price: 2464 },
+      { inner: 110, old: 3010,  price: 2709 },
+      { inner: 120, old: 3289,  price: 2960 },
+      { inner: 130, old: 3563,  price: 3207 },
+      { inner: 140, old: 3835,  price: 3452 },
+      { inner: 150, old: 4116,  price: 3704 },
+      { inner: 160, old: 4382,  price: 3944 },
+      { inner: 180, old: 4928,  price: 4435 },
+      { inner: 200, old: 5480,  price: 4932 },
+      { inner: 220, old: 6059,  price: 5453 },
+      { inner: 230, old: 6299,  price: 5669 },
+      { inner: 250, old: 8112,  price: 7301 },
+      { inner: 300, old: 10895, price: 9806 },
+      { inner: 350, old: 12848, price: 11563 },
+      { inner: 400, old: 14471, price: 13024 },
+    ],
+    '0.8': [
+      { inner: 100, old: 3950,  price: 3555 },
+      { inner: 110, old: 4346,  price: 3911 },
+      { inner: 120, old: 4742,  price: 4268 },
+      { inner: 130, old: 5137,  price: 4623 },
+      { inner: 140, old: 5528,  price: 4975 },
+      { inner: 150, old: 5932,  price: 5339 },
+      { inner: 160, old: 6327,  price: 5694 },
+      { inner: 180, old: 7112,  price: 6401 },
+      { inner: 200, old: 7905,  price: 7115 },
+      { inner: 220, old: 8730,  price: 7857 },
+      { inner: 230, old: 9086,  price: 8177 },
+      { inner: 250, old: 11746, price: 10571 },
+      { inner: 300, old: 16052, price: 14447 },
+      { inner: 350, old: 16416, price: 14774 },
+      { inner: 400, old: 17631, price: 15868 },
+    ],
+    '1.0': [
+      { inner: 100, old: 4737,  price: 4263 },
+      { inner: 110, old: 5215,  price: 4694 },
+      { inner: 120, old: 5692,  price: 5123 },
+      { inner: 130, old: 6165,  price: 5549 },
+      { inner: 140, old: 6643,  price: 5979 },
+      { inner: 150, old: 7116,  price: 6404 },
+      { inner: 160, old: 7586,  price: 6827 },
+      { inner: 180, old: 8536,  price: 7682 },
+      { inner: 200, old: 9486,  price: 8537 },
+      { inner: 220, old: 10468, price: 9421 },
+      { inner: 230, old: 10907, price: 9816 },
+      { inner: 250, old: 14584, price: 13126 },
+      { inner: 300, old: 19721, price: 17749 },
+      { inner: 350, old: 20377, price: 18339 },
+      { inner: 400, old: 21112, price: 19001 },
+    ],
+  },
+  nerzh: {
+    '0.6': [
+      { inner: 100, outer: 160, old: null,  price: null  },
+      { inner: 110, outer: 180, old: null,  price: null  },
+      { inner: 120, outer: 180, old: null,  price: null  },
+      { inner: 130, outer: 200, old: null,  price: null  },
+      { inner: 140, outer: 200, old: 10702, price: 9632  },
+      { inner: 150, outer: 220, old: 11612, price: 10451 },
+      { inner: 160, outer: 220, old: 11974, price: 10777 },
+      { inner: 180, outer: 250, old: 13549, price: 12194 },
+      { inner: 200, outer: 260, old: 14571, price: 13114 },
+      { inner: 220, outer: 280, old: 15846, price: 14261 },
+      { inner: 230, outer: 300, old: null,  price: null  },
+      { inner: 250, outer: 320, old: null,  price: null  },
+      { inner: 300, outer: 360, old: null,  price: null  },
+      { inner: 350, outer: 420, old: null,  price: null  },
+      { inner: 400, outer: 460, old: null,  price: null  },
+    ],
+    '0.8': [
+      { inner: 100, outer: 160, old: null,  price: null  },
+      { inner: 110, outer: 180, old: null,  price: null  },
+      { inner: 120, outer: 180, old: null,  price: null  },
+      { inner: 130, outer: 200, old: null,  price: null  },
+      { inner: 140, outer: 200, old: null,  price: null  },
+      { inner: 150, outer: 220, old: 13727, price: 12354 },
+      { inner: 160, outer: 220, old: 14143, price: 12729 },
+      { inner: 180, outer: 250, old: 15998, price: 14398 },
+      { inner: 200, outer: 260, old: 17193, price: 15474 },
+      { inner: 220, outer: 280, old: 18700, price: 16830 },
+      { inner: 230, outer: 300, old: null,  price: null  },
+      { inner: 250, outer: 320, old: null,  price: null  },
+      { inner: 300, outer: 360, old: null,  price: null  },
+      { inner: 350, outer: 420, old: null,  price: null  },
+      { inner: 400, outer: 460, old: null,  price: null  },
+    ],
+    '1.0': [
+      { inner: 100, outer: 160, old: null,  price: null  },
+      { inner: 110, outer: 180, old: null,  price: null  },
+      { inner: 120, outer: 180, old: null,  price: null  },
+      { inner: 130, outer: 200, old: null,  price: null  },
+      { inner: 140, outer: 200, old: null,  price: null  },
+      { inner: 150, outer: 220, old: 14593, price: 13134 },
+      { inner: 160, outer: 220, old: 15033, price: 13530 },
+      { inner: 180, outer: 250, old: 17010, price: 15309 },
+      { inner: 200, outer: 260, old: 18277, price: 16449 },
+      { inner: 220, outer: 280, old: 21279, price: 19151 },
+      { inner: 230, outer: 300, old: null,  price: null  },
+      { inner: 250, outer: 320, old: null,  price: null  },
+      { inner: 300, outer: 360, old: null,  price: null  },
+      { inner: 350, outer: 420, old: null,  price: null  },
+      { inner: 400, outer: 460, old: null,  price: null  },
+    ],
+  },
+  galv: {
+    '0.6': [
+      { inner: 100, outer: 160, old: 6124,  price: 5512  },
+      { inner: 110, outer: 180, old: 6896,  price: 6206  },
+      { inner: 120, outer: 180, old: 7053,  price: 6348  },
+      { inner: 130, outer: 200, old: 7861,  price: 7075  },
+      { inner: 140, outer: 200, old: null,  price: null  },
+      { inner: 150, outer: 220, old: 8833,  price: 7950  },
+      { inner: 160, outer: 220, old: 9614,  price: 8653  },
+      { inner: 180, outer: 250, old: 10392, price: 9353  },
+      { inner: 200, outer: 260, old: 11062, price: 9956  },
+      { inner: 220, outer: 280, old: 13692, price: 12323 },
+      { inner: 230, outer: 300, old: null,  price: null  },
+      { inner: 250, outer: 320, old: null,  price: null  },
+      { inner: 300, outer: 360, old: null,  price: null  },
+      { inner: 350, outer: 420, old: null,  price: null  },
+      { inner: 400, outer: 460, old: null,  price: null  },
+    ],
+    '0.8': [
+      { inner: 100, outer: 160, old: null,  price: null  },
+      { inner: 110, outer: 180, old: 8501,  price: 7651  },
+      { inner: 120, outer: 180, old: 8803,  price: 7923  },
+      { inner: 130, outer: 200, old: null,  price: null  },
+      { inner: 140, outer: 200, old: null,  price: null  },
+      { inner: 150, outer: 220, old: 11033, price: 9930  },
+      { inner: 160, outer: 220, old: 11432, price: 10289 },
+      { inner: 180, outer: 250, old: 13034, price: 11731 },
+      { inner: 200, outer: 260, old: 13998, price: 12598 },
+      { inner: 220, outer: 280, old: 17468, price: 15721 },
+      { inner: 230, outer: 300, old: null,  price: null  },
+      { inner: 250, outer: 320, old: null,  price: null  },
+      { inner: 300, outer: 360, old: null,  price: null  },
+      { inner: 350, outer: 420, old: null,  price: null  },
+      { inner: 400, outer: 460, old: 30061, price: 27055 },
+    ],
+    '1.0': [
+      { inner: 100, outer: 160, old: null,  price: null  },
+      { inner: 110, outer: 180, old: null,  price: null  },
+      { inner: 120, outer: 180, old: null,  price: null  },
+      { inner: 130, outer: 200, old: null,  price: null  },
+      { inner: 140, outer: 200, old: null,  price: null  },
+      { inner: 150, outer: 220, old: 12480, price: 11232 },
+      { inner: 160, outer: 220, old: 13007, price: 11706 },
+      { inner: 180, outer: 250, old: 14813, price: 13332 },
+      { inner: 200, outer: 260, old: 15968, price: 14371 },
+      { inner: 220, outer: 280, old: 19966, price: 17969 },
+      { inner: 230, outer: 300, old: null,  price: null  },
+      { inner: 250, outer: 320, old: null,  price: null  },
+      { inner: 300, outer: 360, old: null,  price: null  },
+      { inner: 350, outer: 420, old: null,  price: null  },
+      { inner: 400, outer: 460, old: null,  price: null  },
+    ],
+  },
+};
+
+const THICKNESSES = ['0.6', '0.8', '1.0'];
+const THICKNESS_LABEL = { '0.6': '0,6 мм', '0.8': '0,8 мм', '1.0': '1 мм' };
 
 const UAH = new Intl.NumberFormat('uk-UA').format;
 
 const diaList = document.getElementById('diaList');
+const thList = document.getElementById('thList');
 const diaRing = document.getElementById('diaRing');
 const diaValue = document.getElementById('diaValue');
 const diaTitle = document.getElementById('diaTitle');
@@ -152,11 +283,42 @@ function scaleFor(diameter) {
 }
 
 let currentType = 'single';
+let currentThickness = '0.6';
 let currentIndex = 0;
+
+function currentItems() {
+  return (PRICES[currentType] && PRICES[currentType][currentThickness]) || [];
+}
+
+function titleSuffix(type, t) {
+  if (type === 'single') return t.single;
+  if (type === 'galv') return t.insulatedGalv;
+  return t.insulated;
+}
+
+function renderThButtons() {
+  thList.innerHTML = '';
+  THICKNESSES.forEach((th) => {
+    const btn = document.createElement('button');
+    const available = (PRICES[currentType][th] || []).length > 0;
+    btn.className = 'th-btn' + (th === currentThickness ? ' active' : '') + (available ? '' : ' disabled');
+    btn.textContent = THICKNESS_LABEL[th];
+    btn.disabled = !available;
+    btn.addEventListener('click', () => {
+      if (!available) return;
+      currentThickness = th;
+      currentIndex = 0;
+      renderThButtons();
+      renderDiaButtons();
+      updatePanel();
+    });
+    thList.appendChild(btn);
+  });
+}
 
 function renderDiaButtons() {
   diaList.innerHTML = '';
-  const items = currentType === 'single' ? SINGLE_DIAMETERS : INSULATED_DIAMETERS;
+  const items = currentItems();
   items.forEach((item, i) => {
     const btn = document.createElement('button');
     btn.className = 'dia-btn' + (i === currentIndex ? ' active' : '');
@@ -174,22 +336,31 @@ function renderDiaButtons() {
 
 function updatePanel() {
   const t = PICKER_I18N[currentLang];
-  const items = currentType === 'single' ? SINGLE_DIAMETERS : INSULATED_DIAMETERS;
+  const items = currentItems();
   const item = items[currentIndex];
+  if (!item) {
+    diaTitle.textContent = '—';
+    diaInner.textContent = '—';
+    diaPriceOld.textContent = '';
+    diaPriceNew.textContent = t.ask;
+    return;
+  }
   const inner = item.inner;
+  const suffix = titleSuffix(currentType, t);
+  const thLabel = THICKNESS_LABEL[currentThickness];
   if (currentType === 'single') {
     diaValue.textContent = inner;
-    diaTitle.textContent = `Ø${inner} мм — ${t.single}`;
+    diaTitle.textContent = `Ø${inner} мм — ${suffix}`;
     diaInner.textContent = `Ø${inner} мм`;
     diaCta.textContent = inner;
   } else {
     diaValue.textContent = inner;
-    diaTitle.textContent = `Ø${inner}/${item.outer} мм — ${t.insulated}`;
+    diaTitle.textContent = `Ø${inner}/${item.outer} мм — ${suffix}`;
     diaInner.textContent = `Ø${inner} / ${item.outer} мм`;
     diaCta.textContent = `${inner}/${item.outer}`;
   }
   diaRing.style.setProperty('--dia-scale', scaleFor(inner).toFixed(3));
-  diaThickness.textContent = '0,6 / 0,8 / 1 мм';
+  diaThickness.textContent = thLabel;
   if (item.price) {
     diaPriceOld.textContent = item.old ? `${UAH(item.old)} ₴` : '';
     diaPriceNew.textContent = `${t.from} ${UAH(item.price)} ₴`;
@@ -204,12 +375,16 @@ typeButtons.forEach((btn) => {
     typeButtons.forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     currentType = btn.dataset.type;
+    // Pick first thickness that has items for this type
+    currentThickness = THICKNESSES.find((th) => (PRICES[currentType][th] || []).length > 0) || '0.6';
     currentIndex = 0;
+    renderThButtons();
     renderDiaButtons();
     updatePanel();
   });
 });
 
+renderThButtons();
 renderDiaButtons();
 updatePanel();
 setLang(currentLang);
@@ -327,10 +502,93 @@ form.addEventListener('submit', async (e) => {
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.25;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
   camera.position.set(0, 0, 8);
+
+  // Procedural studio environment — dark base with bright softboxes positioned
+  // around the equator so the mirror-polished pipe shows sharp vertical streak
+  // highlights (classic chrome look), not a flat white wash.
+  const envCanvas = document.createElement('canvas');
+  envCanvas.width = 1024;
+  envCanvas.height = 512;
+  const ectx = envCanvas.getContext('2d');
+
+  // Base: dark grey with subtle top-to-bottom gradient (sky/floor hint).
+  const eg = ectx.createLinearGradient(0, 0, 0, 512);
+  eg.addColorStop(0.00, '#1c1e24');
+  eg.addColorStop(0.45, '#2a2d34');
+  eg.addColorStop(0.55, '#2a2d34');
+  eg.addColorStop(1.00, '#0a0b10');
+  ectx.fillStyle = eg;
+  ectx.fillRect(0, 0, 1024, 512);
+
+  // Softboxes — vertical bright rectangles around the equator.
+  // Each gives a crisp vertical streak on the rotating cylinder.
+  const softbox = (cx, cy, w, h, intensity) => {
+    const g = ectx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) / 1.6);
+    g.addColorStop(0.0, `rgba(255,255,255,${intensity})`);
+    g.addColorStop(0.55, `rgba(255,255,255,${intensity * 0.35})`);
+    g.addColorStop(1.0, `rgba(255,255,255,0)`);
+    ectx.fillStyle = g;
+    ectx.fillRect(cx - w / 2, cy - h / 2, w, h);
+  };
+  // Key light — big bright softbox front-right
+  softbox(760, 240, 220, 380, 1.0);
+  // Fill — softer softbox front-left
+  softbox(280, 250, 180, 320, 0.95);
+  // Back rim highlight
+  softbox(50,  240, 90,  260, 0.8);
+  softbox(990, 240, 90,  260, 0.8);
+  // Small top hair-light
+  softbox(512, 110, 160, 120, 0.6);
+
+  // Hot cores — pure-white saturated centers give HDR-like punch so the
+  // chrome gets a crisp specular glint instead of a muted grey reflection.
+  ectx.globalCompositeOperation = 'lighter';
+  const core = (cx, cy, r) => {
+    const g = ectx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0.0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+    g.addColorStop(1.0, 'rgba(255,255,255,0)');
+    ectx.fillStyle = g;
+    ectx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  };
+  core(760, 240, 90);
+  core(280, 250, 70);
+  core(50,  240, 40);
+  core(990, 240, 40);
+  ectx.globalCompositeOperation = 'source-over';
+
+  // Warm brand accent — orange glow near the key softbox, picked up as a warm glint.
+  const warm = ectx.createRadialGradient(830, 290, 10, 830, 290, 160);
+  warm.addColorStop(0, 'rgba(255,140,60,0.85)');
+  warm.addColorStop(1, 'rgba(255,140,60,0)');
+  ectx.fillStyle = warm;
+  ectx.fillRect(0, 0, 1024, 512);
+
+  // Tiny cool accent opposite side
+  const cool = ectx.createRadialGradient(220, 200, 10, 220, 200, 140);
+  cool.addColorStop(0, 'rgba(160,200,240,0.35)');
+  cool.addColorStop(1, 'rgba(160,200,240,0)');
+  ectx.fillStyle = cool;
+  ectx.fillRect(0, 0, 1024, 512);
+
+  const envTex = new THREE.CanvasTexture(envCanvas);
+  envTex.mapping = THREE.EquirectangularReflectionMapping;
+  envTex.colorSpace = THREE.SRGBColorSpace;
+  try {
+    const cubeRT = new THREE.WebGLCubeRenderTarget(256);
+    cubeRT.fromEquirectangularTexture(renderer, envTex);
+    scene.environment = cubeRT.texture;
+  } catch (e) {
+    // Fallback: use equirect directly (lower quality reflections but still works)
+    scene.environment = envTex;
+  }
 
   const resize = () => {
     const w = canvas.clientWidth;
@@ -346,23 +604,27 @@ form.addEventListener('submit', async (e) => {
   const group = new THREE.Group();
   scene.add(group);
 
-  // Outer pipe — mirror polished stainless
-  const outerGeom = new THREE.CylinderGeometry(1.2, 1.2, 4, 64, 1, true);
+  // Outer pipe — mirror polished stainless steel
+  const outerGeom = new THREE.CylinderGeometry(1.2, 1.2, 4, 128, 1, true);
   const outerMat = new THREE.MeshStandardMaterial({
-    color: 0xf0f0f4,
+    color: 0xeef1f5,
     metalness: 1.0,
-    roughness: 0.12,
+    roughness: 0.035,
+    envMapIntensity: 2.0,
     side: THREE.DoubleSide,
   });
   const outer = new THREE.Mesh(outerGeom, outerMat);
   group.add(outer);
 
   // Inner pipe — polished mirror-finish stainless steel
-  const innerGeom = new THREE.CylinderGeometry(0.85, 0.85, 4.2, 64, 1, true);
-  const innerMat = new THREE.MeshStandardMaterial({
-    color: 0xe8e8ec,
+  const innerGeom = new THREE.CylinderGeometry(0.85, 0.85, 4.2, 128, 1, true);
+  const innerMat = new THREE.MeshPhysicalMaterial({
+    color: 0xf2f4f7,
     metalness: 1.0,
-    roughness: 0.08,
+    roughness: 0.02,
+    envMapIntensity: 1.9,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.02,
     side: THREE.DoubleSide,
   });
   const inner = new THREE.Mesh(innerGeom, innerMat);
@@ -398,75 +660,16 @@ form.addEventListener('submit', async (e) => {
     group.add(line);
   }
 
-  // Product logo label wrapped around the pipe
-  const logoCanvas = document.createElement('canvas');
-  logoCanvas.width = 2048;
-  logoCanvas.height = 256;
-  const lctx = logoCanvas.getContext('2d');
-  lctx.clearRect(0, 0, logoCanvas.width, logoCanvas.height);
-
-  // Draw logo 2 times around so it's visible from both sides
-  const drawLogo = (cx) => {
-    // orange mark circle
-    const markSize = 56;
-    lctx.save();
-    lctx.translate(cx - 220, 128);
-    const grad = lctx.createLinearGradient(-markSize, -markSize, markSize, markSize);
-    grad.addColorStop(0, '#ff8a4c');
-    grad.addColorStop(1, '#e04f1c');
-    lctx.fillStyle = grad;
-    lctx.beginPath();
-    lctx.roundRect(-markSize / 2, -markSize / 2, markSize, markSize, 14);
-    lctx.fill();
-    // inner ring
-    lctx.strokeStyle = 'rgba(255,255,255,0.95)';
-    lctx.lineWidth = 5;
-    lctx.beginPath();
-    lctx.arc(0, 0, markSize / 3.5, 0, Math.PI * 2);
-    lctx.stroke();
-    lctx.restore();
-
-    // SOFDIM text
-    lctx.fillStyle = '#ffffff';
-    lctx.font = '900 108px Unbounded, Inter, sans-serif';
-    lctx.textAlign = 'left';
-    lctx.textBaseline = 'middle';
-    lctx.fillText('SOFDIM', cx - 170, 128);
-  };
-  drawLogo(logoCanvas.width * 0.25);
-  drawLogo(logoCanvas.width * 0.75);
-
-  const logoTex = new THREE.CanvasTexture(logoCanvas);
-  logoTex.anisotropy = 8;
-
-  const labelGeom = new THREE.CylinderGeometry(1.215, 1.215, 0.5, 128, 1, true);
-  const labelMat = new THREE.MeshStandardMaterial({
-    map: logoTex,
-    transparent: true,
-    side: THREE.DoubleSide,
-    metalness: 0.3,
-    roughness: 0.5,
-    emissive: 0xffffff,
-    emissiveMap: logoTex,
-    emissiveIntensity: 0.25,
-  });
-  const label = new THREE.Mesh(labelGeom, labelMat);
-  label.position.y = 0.2;
-  group.add(label);
-
-  // Lighting
-  const ambient = new THREE.AmbientLight(0x404040, 2);
-  scene.add(ambient);
-
-  const key = new THREE.DirectionalLight(0xffffff, 1.2);
+  // Lighting — env map does the heavy lifting; direct lights add highlights only
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
   key.position.set(5, 5, 5);
   scene.add(key);
 
-  const rim = new THREE.PointLight(0xff6b35, 3, 20);
+  const rim = new THREE.PointLight(0xff6b35, 0.9, 20);
   rim.position.set(-3, 2, 3);
   scene.add(rim);
 
-  const fill = new THREE.PointLight(0xfbbf24, 1.5, 15);
+  const fill = new THREE.PointLight(0xffffff, 0.8, 15);
   fill.position.set(3, -2, 2);
   scene.add(fill);
 
