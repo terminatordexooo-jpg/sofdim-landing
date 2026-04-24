@@ -76,6 +76,53 @@ document.querySelectorAll('.card').forEach((card) => {
   });
 });
 
+/* --------- Kit photo carousel --------- */
+(() => {
+  const track = document.getElementById('kitCarouselTrack');
+  const dotsBox = document.getElementById('kitCarouselDots');
+  const carousel = document.getElementById('kitCarousel');
+  if (!track || !dotsBox || !carousel) return;
+
+  const total = track.children.length;
+  let idx = 0;
+  let timer;
+
+  const go = (i) => {
+    idx = (i + total) % total;
+    track.style.transform = `translateX(-${idx * 100}%)`;
+    dotsBox.querySelectorAll('.kit-dot').forEach((d, k) => d.classList.toggle('active', k === idx));
+  };
+  const next = () => go(idx + 1);
+  const prev = () => go(idx - 1);
+  const start = () => { stop(); timer = setInterval(next, 4500); };
+  const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'kit-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', `Слайд ${i + 1}`);
+    dot.addEventListener('click', () => { go(i); start(); });
+    dotsBox.appendChild(dot);
+  }
+  carousel.querySelector('.kit-prev').addEventListener('click', () => { prev(); start(); });
+  carousel.querySelector('.kit-next').addEventListener('click', () => { next(); start(); });
+  carousel.addEventListener('mouseenter', stop);
+  carousel.addEventListener('mouseleave', start);
+
+  // Touch swipe
+  let startX = 0, moved = false;
+  track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; moved = false; stop(); }, { passive: true });
+  track.addEventListener('touchmove', () => { moved = true; }, { passive: true });
+  track.addEventListener('touchend', (e) => {
+    if (!moved) { start(); return; }
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx > 40) prev(); else if (dx < -40) next();
+    start();
+  });
+
+  start();
+})();
+
 /* --------- Catalog cards → calculator --------- */
 document.querySelectorAll('.cat-card').forEach((card) => {
   card.style.cursor = 'pointer';

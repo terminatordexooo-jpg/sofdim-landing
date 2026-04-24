@@ -773,6 +773,106 @@ a { color: inherit; text-decoration: none; transition: color .2s; }
 }
 
 /* ============================================
+   Kit photo carousel
+   ============================================ */
+.kit-carousel {
+  position: relative;
+  max-width: 900px;
+  margin: 40px auto 56px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  box-shadow: 0 20px 60px -20px rgba(0,0,0,.5);
+}
+.kit-carousel-viewport {
+  width: 100%;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+}
+.kit-carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform .55s cubic-bezier(.2,.7,.2,1);
+}
+.kit-slide {
+  flex: 0 0 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0c0c0e;
+}
+.kit-slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.kit-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: rgba(10,10,11,.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border-strong);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all .25s;
+  display: grid;
+  place-items: center;
+  padding: 0 0 2px;
+  z-index: 2;
+}
+.kit-arrow:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 24px -4px rgba(var(--glow),.7);
+}
+.kit-prev { left: 14px; }
+.kit-next { right: 14px; }
+.kit-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+.kit-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.35);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: all .25s;
+}
+.kit-dot:hover { background: rgba(255,255,255,.6); }
+.kit-dot.active {
+  background: var(--primary);
+  width: 24px;
+  border-radius: 4px;
+  box-shadow: 0 0 12px -2px rgba(var(--glow),.6);
+}
+@media (max-width: 560px) {
+  .kit-carousel { margin: 28px auto 40px; border-radius: 14px; }
+  .kit-arrow { width: 38px; height: 38px; font-size: 22px; }
+  .kit-prev { left: 8px; }
+  .kit-next { right: 8px; }
+  .kit-dots { bottom: 10px; gap: 6px; }
+  .kit-dot { width: 6px; height: 6px; }
+  .kit-dot.active { width: 18px; }
+}
+
+/* ============================================
    Catalog cards (visual blocks)
    ============================================ */
 
